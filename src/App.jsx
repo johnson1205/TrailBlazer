@@ -216,8 +216,8 @@ function App() {
         type: "Feature",
         properties: {
           exportDate: new Date().toISOString(),
-          appVersion: "1.0",
-          description: "Fog of War - Cleared Area"
+          appVersion: "1.1",
+          description: "TrailBlazer - Cleared Area"
         },
         geometry: clearedArea
       };
@@ -227,7 +227,7 @@ function App() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `fog-of-war-${Date.now()}.geojson`;
+      a.download = `trailblazer-${Date.now()}.geojson`;
       a.click();
       URL.revokeObjectURL(url);
       
@@ -248,7 +248,7 @@ function App() {
       <MapComponent clearedArea={clearedArea} center={mapCenter} processKey={mapKey} />
       
       <div className="ui-overlay">
-        <h1 className="ui-title">Fog of War</h1>
+        <h1 className="ui-title">TrailBlazer</h1>
         <p style={{fontSize: '0.8rem', color: '#aaa', marginBottom: '1rem'}}>
           {statusMessage}
         </p>

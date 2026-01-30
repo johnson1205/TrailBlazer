@@ -1,10 +1,10 @@
-# Fog of War - Real-World GPS Track Visualizer
+# TrailBlazer - Explore the Real World
 
-A React-based web application that visualizes your real-world exploration using GPS tracks. Upload your GPX files and watch as the map reveals the areas you've explored, with intelligent "city block" filling for enclosed areas.
+Turn your real-world adventures into an exploration game! Upload your GPS tracks and watch as you unveil the map, revealing the areas you've conquered. Challenge yourself to explore every street and fill in the gaps.
 
-🌐 **[Live Demo](https://johnson1205.github.io/Fog_of_War/)**
+🌐 **[Play Now](https://johnson1205.github.io/Fog_of_War/)**
 
-![Fog of War Demo](https://img.shields.io/badge/status-live-brightgreen)
+![TrailBlazer Demo](https://img.shields.io/badge/status-live-brightgreen)
 ![Version](https://img.shields.io/badge/version-1.1-blue)
 ![React](https://img.shields.io/badge/React-19.2.0-blue)
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9.4-green)
@@ -12,47 +12,47 @@ A React-based web application that visualizes your real-world exploration using 
 ## 📋 Version History
 
 ### Version 1.1 (Current)
-- ✨ **Save/Load Progress**: Export and import your exploration as GeoJSON files
-- ⚡ **Performance Optimization**: 3x faster block filling with parallel API requests and caching
-- 📍 **Waypoint Support**: Automatically convert GPX waypoints to continuous tracks
-- 🔧 **Enhanced Error Handling**: Better feedback for invalid files
+- 💾 **Save Your Progress**: Export and reload your exploration journey
+- ⚡ **Faster Exploration**: 3x faster area discovery with smart caching
+- 📍 **Waypoint Adventures**: Turn any GPS waypoints into exploration paths
+- 🎮 **Better Feedback**: Enhanced game-like status updates
 
 ### Version 1.0
-- 🗺️ Basic GPS track visualization
-- 🎯 Intelligent block filling with Overpass API
-- 📁 GPX file import support
-- 🌐 Real-time street detection
+- 🗺️ **Map Unveiling**: Reveal areas as you explore
+- 🎯 **Smart Block Filling**: Automatically claim enclosed territories
+- 📁 **GPS Track Import**: Upload your adventures
+- 🌐 **Real-time Discovery**: Live street detection system
 
 
-## ✨ Features
+## 🎮 Game Features
 
-### 📍 GPS Track Processing
-- **Multiple Format Support**: Import GPX files containing tracks (`<trk>`) or waypoints (`<wpt>`)
-- **GeoJSON Import/Export**: Save and load your exploration progress
-- **Automatic Conversion**: Waypoints are automatically connected into continuous paths
-- **Smart Buffering**: 15-meter radius buffer around your tracks for realistic coverage visualization
-- **Multi-Track Support**: Upload multiple GPX files to build your exploration map over time
+### 🏃 Your Exploration Journey
+- **Multiple Adventure Formats**: Import GPS tracks or waypoints from your real-world journeys
+- **Save Your Progress**: Export your conquered territories and continue later
+- **Path Conversion**: Waypoints automatically connect into exploration routes
+- **Smart Territory Claiming**: 15-meter radius around your path becomes yours
+- **Multi-Session Adventures**: Build your explored world across multiple trips
 
-### 🗺️ Intelligent Block Filling
-- **Automatic Detection**: Identifies enclosed areas (loops) in your tracks
-- **Street Verification**: Queries OpenStreetMap via Overpass API to check for streets inside loops
-- **Smart Filling**: Only fills blocks that don't contain streets, preserving realistic exploration patterns
-- **Real-time Feedback**: Live status updates during processing ("Querying Overpass API for streets...")
-- **Parallel Processing**: 3x faster with batch API requests (3 concurrent)
-- **Smart Caching**: Previously checked blocks are cached for instant re-validation
+### 🗺️ Intelligent Territory Expansion
+- **Auto-Discovery**: Enclosed areas are automatically detected
+- **Street Verification**: Real-time checks to see if you've surrounded a city block
+- **Smart Claiming**: Only claim blocks you've truly surrounded (no streets inside)
+- **Live Updates**: Watch your progress as the game analyzes your routes
+- **Parallel Processing**: Discover 3x faster with batch territory checks
+- **Memory System**: Previously checked areas are instantly validated
 
-### 💾 Save & Load
-- **Export Progress**: Download your cleared area as GeoJSON with metadata
-- **Resume Exploration**: Import saved files to continue where you left off
-- **Incremental Updates**: Load saved progress, add new tracks, and save again
-- **Standard Format**: Compatible with GIS tools (QGIS, ArcGIS, etc.)
+### 💾 Progress Management
+- **Export Adventures**: Download your explored map as a shareable file
+- **Resume Anytime**: Load your saved progress and continue exploring
+- **Incremental Growth**: Add new adventures to your existing map
+- **Standard Format**: Compatible with mapping tools (QGIS, ArcGIS, etc.)
 
 
-### 🎨 Interactive Map
-- **OpenStreetMap Integration**: High-quality, free map tiles
-- **Dynamic Updates**: Map automatically refreshes as you upload new tracks
-- **Visual Feedback**: Clear distinction between explored areas and fog of war
-- **Responsive Design**: Works on desktop and mobile devices
+### 🎨 Interactive Game Map
+- **OpenStreetMap Base**: High-quality world map
+- **Live Updates**: Watch territories unveil in real-time
+- **Clear Visualization**: See exactly what you've conquered
+- **Responsive Play**: Works on desktop and mobile devices
 
 ## 🚀 Quick Start
 
@@ -85,19 +85,19 @@ npm run build
 npm run preview
 ```
 
-## 📖 Usage
+## 🎯 How to Play
 
-1. **Upload a GPX File**: Click "Upload Track/Progress" and select your GPS track file
-2. **Watch the Magic**: The app will:
-   - Parse your track data
-   - Create a 15m buffer around your path
-   - Detect any enclosed areas (loops)
-   - Query OpenStreetMap to check for streets (in parallel batches)
-   - Fill blocks that don't contain streets
-3. **Save Your Progress**: Click "💾 Save Progress" to download a `.geojson` file
-4. **Resume Later**: Upload the saved `.geojson` file to restore your exploration
-5. **Continue Exploring**: Add more GPX tracks to expand your explored area
-6. **Re-scan**: Click "Re-Scan Blocks" to manually re-trigger the block filling algorithm
+1. **Upload Your Adventure**: Click "Upload Track/Progress" and select your GPS track file
+2. **Watch the Map Unveil**: The game will:
+   - Process your journey
+   - Claim a 15m radius around your path
+   - Detect any enclosed territories
+   - Check for streets inside (using OpenStreetMap)
+   - Automatically claim empty blocks you've surrounded
+3. **Save Your Progress**: Click "💾 Save Progress" to download your conquered map
+4. **Continue Your Quest**: Upload the saved file to resume your exploration
+5. **Expand Your Territory**: Add more GPS tracks to grow your explored world
+6. **Re-scan**: Click "Re-Scan Blocks" to re-analyze your territories
 
 ## 🛠️ Technology Stack
 

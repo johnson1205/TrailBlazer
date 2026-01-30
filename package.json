@@ -1,7 +1,7 @@
 {
-  "name": "warfog",
+  "name": "trailblazer",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.1.0",
   "type": "module",
   "homepage": "https://johnson1205.github.io/Fog_of_War",
   "scripts": {
