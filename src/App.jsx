@@ -18,10 +18,16 @@ function App() {
     let newPathPolygon = null;
     let featureCount = 0;
     const typesFound = new Set();
+    const waypoints = []; // Collect waypoints (Point features)
 
     turf.featureEach(geoJson, (currentFeature) => {
       featureCount++;
       if(currentFeature.geometry) typesFound.add(currentFeature.geometry.type);
+      
+      // Collect Point features (waypoints)
+      if (currentFeature.geometry.type === 'Point') {
+          waypoints.push(currentFeature.geometry.coordinates);
+      }
       
       // Support both LineString and MultiLineString
       if (currentFeature.geometry.type === 'LineString' || currentFeature.geometry.type === 'MultiLineString') {
@@ -45,6 +51,23 @@ function App() {
         }
       }
     });
+
+    // Convert waypoints to LineString if we have them but no tracks
+    if (waypoints.length > 0 && !newPathPolygon) {
+        console.log(`Converting ${waypoints.length} waypoints to LineString...`);
+        setStatusMessage(`Converting ${waypoints.length} waypoints to track...`);
+        
+        // Create a LineString from the waypoints
+        const lineString = turf.lineString(waypoints);
+        const buffered = bufferPath(lineString, 15);
+        newPathPolygon = buffered;
+        
+        // Set map center to first waypoint
+        if (!mapCenter && waypoints.length > 0) {
+            const [lon, lat] = waypoints[0];
+            setMapCenter([lat, lon]);
+        }
+    }
 
     // Debug logging
     console.log(`GPX Parse Result: ${featureCount} features found`);
