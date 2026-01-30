@@ -2,7 +2,7 @@
 
 Turn your real-world adventures into an exploration game! Upload your GPS tracks and watch as you unveil the map, revealing the areas you've conquered. Challenge yourself to explore every street and fill in the gaps.
 
-🌐 **[Play Now](https://johnson1205.github.io/Fog_of_War/)**
+🌐 **[Play Now](https://johnson1205.github.io/TrailBlazer/)**
 
 ![TrailBlazer Demo](https://img.shields.io/badge/status-live-brightgreen)
 ![Version](https://img.shields.io/badge/version-1.1-blue)
@@ -63,8 +63,8 @@ Turn your real-world adventures into an exploration game! Upload your GPS tracks
 
 ```bash
 # Clone the repository
-git clone https://github.com/johnson1205/Fog_of_War.git
-cd Fog_of_War
+git clone https://github.com/johnson1205/TrailBlazer.git
+cd TrailBlazer
 
 # Install dependencies
 npm install
@@ -118,7 +118,7 @@ npm run preview
 ## 📁 Project Structure
 
 ```
-Fog_of_War/
+TrailBlazer/
 ├── src/
 │   ├── App.jsx                 # Main application logic
 │   ├── components/
@@ -155,7 +155,7 @@ This project is configured for GitHub Pages deployment:
 npm run deploy
 ```
 
-The app will be available at `https://[username].github.io/Fog_of_War/`
+The app will be available at `https://[username].github.io/TrailBlazer/`
 
 ## 🐛 Known Limitations
 
