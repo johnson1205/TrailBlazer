@@ -79,6 +79,19 @@ const processPolygon = async (polygonGeom, onStatusUpdate) => {
   return { type: 'Polygon', coordinates: newCoords };
 };
 
+// Cache for previously checked holes (persists across uploads in same session)
+const holeCache = new Map();
+
+/**
+ * Generate a cache key for a hole based on its centroid and area
+ */
+const getHoleCacheKey = (holePoly, area) => {
+  const centroid = turf.centroid(holePoly);
+  const [lon, lat] = centroid.geometry.coordinates;
+  // Round to 5 decimal places (~1 meter precision)
+  return `${lat.toFixed(5)}_${lon.toFixed(5)}_${Math.round(area)}`;
+};
+
 const processPolygonCoordinates = async (coords, onStatusUpdate) => {
   if (coords.length <= 1) return coords; // No holes to check
 
@@ -90,45 +103,106 @@ const processPolygonCoordinates = async (coords, onStatusUpdate) => {
       onStatusUpdate(`Found ${holes.length} potential blocks (holes). Checking sizes...`);
   }
 
-  let processedCount = 0;
+  // Filter holes by size and prepare for batch processing
+  const validHoles = [];
+  const validHoleData = [];
+  
   for (const hole of holes) {
-    processedCount++;
     const holePoly = turf.polygon([hole]);
     const holeArea = turf.area(holePoly);
-    const bbox = turf.bbox(holePoly); // [minX, minY, maxX, maxY]
-
-    // 1. Size Check
-    if (holeArea > 50 && holeArea < 5000000) {
-       const sizeStr = Math.round(holeArea).toLocaleString();
-       console.log(`Checking block candidate: ${sizeStr} sqm`);
-       onStatusUpdate(`Checking block ${processedCount}/${holes.length} (${sizeStr} sqm)...`);
-       
-       // 2. Real Street Check (Overpass API)
-       onStatusUpdate(`Querying Overpass API for streets in block ${processedCount}...`);
-       
-       // Optimization: Simple bbox check first.
-       const hasStreets = await checkIfBlockHasStreets(bbox, holePoly);
-       
-       if (!hasStreets) {
-           console.log(`[Block Fill] Filling block! Size: ${sizeStr}sqm.`);
-           onStatusUpdate(`Filled block ${processedCount} (No streets found).`);
-           // To "fill" it, we simply DO NOT add it to newHoles.
-           continue; 
-       } else {
-           const distinct = "Streets Detected"; // We could be more specific if we parsed API result
-           console.log(`[Block Fill] Block NOT filled. Reason: ${distinct}.`);
-           onStatusUpdate(`Block ${processedCount} NOT filled (${distinct}).`); 
-       }
-    } else {
-        // Log if size was the issue (optional, maybe too spammy for UI)
-        // console.log(`Hole skipped (Size: ${holeArea})`);
-    }
     
-    // If we reach here, we keep the hole
-    newHoles.push(hole);
+    if (holeArea > 50 && holeArea < 5000000) {
+      validHoles.push(hole);
+      validHoleData.push({
+        hole,
+        holePoly,
+        holeArea,
+        bbox: turf.bbox(holePoly)
+      });
+    } else {
+      // Too small or too large - keep the hole
+      newHoles.push(hole);
+    }
+  }
+
+  if (validHoles.length === 0) {
+    onStatusUpdate("No valid blocks to check.");
+    return [outerRing, ...newHoles];
+  }
+
+  // Check cache and separate cached vs uncached
+  const cachedResults = [];
+  const uncachedData = [];
+  
+  for (const data of validHoleData) {
+    const cacheKey = getHoleCacheKey(data.holePoly, data.holeArea);
+    if (holeCache.has(cacheKey)) {
+      const hasStreets = holeCache.get(cacheKey);
+      cachedResults.push({ ...data, hasStreets, cached: true });
+    } else {
+      uncachedData.push({ ...data, cacheKey });
+    }
+  }
+
+  if (cachedResults.length > 0) {
+    onStatusUpdate(`Using cached results for ${cachedResults.length} blocks...`);
+  }
+
+  // Process uncached holes in parallel batches
+  const BATCH_SIZE = 3; // Conservative batch size to respect API limits
+  const uncachedResults = [];
+  
+  if (uncachedData.length > 0) {
+    onStatusUpdate(`Checking ${uncachedData.length} new blocks (batch size: ${BATCH_SIZE})...`);
+    
+    for (let i = 0; i < uncachedData.length; i += BATCH_SIZE) {
+      const batch = uncachedData.slice(i, i + BATCH_SIZE);
+      const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+      const totalBatches = Math.ceil(uncachedData.length / BATCH_SIZE);
+      
+      onStatusUpdate(`Processing batch ${batchNum}/${totalBatches} (${batch.length} blocks)...`);
+      
+      // Process batch in parallel
+      const results = await Promise.all(
+        batch.map(async (data, idx) => {
+          const globalIdx = i + idx + 1;
+          const sizeStr = Math.round(data.holeArea).toLocaleString();
+          console.log(`[Batch ${batchNum}] Checking block ${globalIdx}/${uncachedData.length}: ${sizeStr} sqm`);
+          
+          const hasStreets = await checkIfBlockHasStreets(data.bbox, data.holePoly);
+          
+          // Cache the result
+          holeCache.set(data.cacheKey, hasStreets);
+          
+          return { ...data, hasStreets, cached: false };
+        })
+      );
+      
+      uncachedResults.push(...results);
+    }
+  }
+
+  // Combine all results and process
+  const allResults = [...cachedResults, ...uncachedResults];
+  let filledCount = 0;
+  let keptCount = 0;
+  
+  for (const result of allResults) {
+    const sizeStr = Math.round(result.holeArea).toLocaleString();
+    const cacheTag = result.cached ? " [Cached]" : "";
+    
+    if (!result.hasStreets) {
+      console.log(`[Block Fill] Filling block! Size: ${sizeStr}sqm${cacheTag}`);
+      filledCount++;
+      // Don't add to newHoles (fill it)
+    } else {
+      console.log(`[Block Fill] Block NOT filled. Reason: Streets Detected${cacheTag}`);
+      newHoles.push(result.hole);
+      keptCount++;
+    }
   }
   
-  onStatusUpdate("Block analysis complete.");
+  onStatusUpdate(`Block analysis complete. Filled: ${filledCount}, Kept: ${keptCount}`);
   return [outerRing, ...newHoles];
 };
 

@@ -5,13 +5,30 @@ A React-based web application that visualizes your real-world exploration using 
 🌐 **[Live Demo](https://johnson1205.github.io/Fog_of_War/)**
 
 ![Fog of War Demo](https://img.shields.io/badge/status-live-brightgreen)
+![Version](https://img.shields.io/badge/version-1.1-blue)
 ![React](https://img.shields.io/badge/React-19.2.0-blue)
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9.4-green)
+
+## 📋 Version History
+
+### Version 1.1 (Current)
+- ✨ **Save/Load Progress**: Export and import your exploration as GeoJSON files
+- ⚡ **Performance Optimization**: 3x faster block filling with parallel API requests and caching
+- 📍 **Waypoint Support**: Automatically convert GPX waypoints to continuous tracks
+- 🔧 **Enhanced Error Handling**: Better feedback for invalid files
+
+### Version 1.0
+- 🗺️ Basic GPS track visualization
+- 🎯 Intelligent block filling with Overpass API
+- 📁 GPX file import support
+- 🌐 Real-time street detection
+
 
 ## ✨ Features
 
 ### 📍 GPS Track Processing
 - **Multiple Format Support**: Import GPX files containing tracks (`<trk>`) or waypoints (`<wpt>`)
+- **GeoJSON Import/Export**: Save and load your exploration progress
 - **Automatic Conversion**: Waypoints are automatically connected into continuous paths
 - **Smart Buffering**: 15-meter radius buffer around your tracks for realistic coverage visualization
 - **Multi-Track Support**: Upload multiple GPX files to build your exploration map over time
@@ -21,6 +38,15 @@ A React-based web application that visualizes your real-world exploration using 
 - **Street Verification**: Queries OpenStreetMap via Overpass API to check for streets inside loops
 - **Smart Filling**: Only fills blocks that don't contain streets, preserving realistic exploration patterns
 - **Real-time Feedback**: Live status updates during processing ("Querying Overpass API for streets...")
+- **Parallel Processing**: 3x faster with batch API requests (3 concurrent)
+- **Smart Caching**: Previously checked blocks are cached for instant re-validation
+
+### 💾 Save & Load
+- **Export Progress**: Download your cleared area as GeoJSON with metadata
+- **Resume Exploration**: Import saved files to continue where you left off
+- **Incremental Updates**: Load saved progress, add new tracks, and save again
+- **Standard Format**: Compatible with GIS tools (QGIS, ArcGIS, etc.)
+
 
 ### 🎨 Interactive Map
 - **OpenStreetMap Integration**: High-quality, free map tiles
@@ -61,15 +87,17 @@ npm run preview
 
 ## 📖 Usage
 
-1. **Upload a GPX File**: Click "Upload GPX Track" and select your GPS track file
+1. **Upload a GPX File**: Click "Upload Track/Progress" and select your GPS track file
 2. **Watch the Magic**: The app will:
    - Parse your track data
    - Create a 15m buffer around your path
    - Detect any enclosed areas (loops)
-   - Query OpenStreetMap to check for streets
+   - Query OpenStreetMap to check for streets (in parallel batches)
    - Fill blocks that don't contain streets
-3. **Add More Tracks**: Upload additional GPX files to expand your explored area
-4. **Re-scan**: Click "Re-Scan Blocks" to manually re-trigger the block filling algorithm
+3. **Save Your Progress**: Click "💾 Save Progress" to download a `.geojson` file
+4. **Resume Later**: Upload the saved `.geojson` file to restore your exploration
+5. **Continue Exploring**: Add more GPX tracks to expand your explored area
+6. **Re-scan**: Click "Re-Scan Blocks" to manually re-trigger the block filling algorithm
 
 ## 🛠️ Technology Stack
 

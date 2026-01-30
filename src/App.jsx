@@ -11,10 +11,66 @@ function App() {
   // Add a version key to force map re-renders because sometimes deep GeoJSON changes aren't detected by key={JSON.stringify}
   const [mapKey, setMapKey] = useState(0);
 
-  const handleFileLoaded = async (geoJson) => {
+  const handleFileLoaded = async (geoJson, fileType = 'gpx') => {
     setStatusMessage("Processing track geometry...");
     
-    // Process the GeoJSON
+    // Handle GeoJSON (saved progress) differently
+    if (fileType === 'geojson') {
+      try {
+        // Extract geometry from the first feature
+        let importedGeometry = null;
+        
+        if (geoJson.type === 'FeatureCollection' && geoJson.features.length > 0) {
+          const feature = geoJson.features[0];
+          if (feature.geometry && (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon')) {
+            importedGeometry = feature.geometry;
+          }
+        }
+        
+        if (!importedGeometry) {
+          setStatusMessage("Invalid GeoJSON format. Expected Polygon or MultiPolygon.");
+          return;
+        }
+        
+        // Merge with existing cleared area
+        const merged = clearedArea ? mergeAreas(clearedArea, importedGeometry) : importedGeometry;
+        
+        console.log('Imported GeoJSON geometry:', importedGeometry.type);
+        console.log('Merged with existing area');
+        
+        // Update map
+        setClearedArea(merged);
+        setMapKey(prev => prev + 1);
+        
+        setStatusMessage("Progress loaded successfully! Upload more tracks to continue exploring.");
+        
+        // Auto-trigger block filling
+        setTimeout(async () => {
+          try {
+            const filled = await fillBlocks(merged, (msg) => {
+              setStatusMessage(msg);
+            });
+            
+            const newRef = JSON.parse(JSON.stringify(filled));
+            setClearedArea(newRef);
+            setMapKey(prev => prev + 1);
+            
+            setStatusMessage("Loaded area re-scanned and updated.");
+          } catch (e) {
+            console.error("Error filling blocks:", e);
+            setStatusMessage("Progress loaded. Error re-scanning blocks.");
+          }
+        }, 1000);
+        
+        return;
+      } catch (e) {
+        console.error("GeoJSON import error:", e);
+        setStatusMessage("Error importing GeoJSON file.");
+        return;
+      }
+    }
+    
+    // Process GPX files (original logic)
     let newPathPolygon = null;
     let featureCount = 0;
     const typesFound = new Set();
@@ -148,6 +204,40 @@ function App() {
     }
   };
 
+  const handleExport = () => {
+    if (!clearedArea) {
+      setStatusMessage("No explored area to export.");
+      return;
+    }
+    
+    try {
+      // Create GeoJSON Feature with metadata
+      const feature = {
+        type: "Feature",
+        properties: {
+          exportDate: new Date().toISOString(),
+          appVersion: "1.0",
+          description: "Fog of War - Cleared Area"
+        },
+        geometry: clearedArea
+      };
+      
+      // Download as file
+      const blob = new Blob([JSON.stringify(feature, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `fog-of-war-${Date.now()}.geojson`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      setStatusMessage("Progress saved successfully!");
+    } catch (e) {
+      console.error("Export error:", e);
+      setStatusMessage("Error exporting progress.");
+    }
+  };
+
   const handleClear = () => {
     setClearedArea(null);
     setStatusMessage("Map cleared.");
@@ -174,14 +264,24 @@ function App() {
           Re-Scan Blocks
         </button>
         
+        <button 
+            className="ui-btn" 
+            style={{backgroundColor: '#3b82f6', marginTop: '0.5rem'}}
+            onClick={handleExport}
+            disabled={!clearedArea}
+        >
+          💾 Save Progress
+        </button>
+        
         <button className="ui-btn secondary" onClick={handleClear}>
           Reset Map
         </button>
         
         <div style={{marginTop: '1rem', fontSize: '0.75rem', color: '#666'}}>
-            <p>1. Upload GPX/XML track.</p>
+            <p>1. Upload GPX/XML/GeoJSON track.</p>
             <p>2. Path is buffered (15m) & cleared.</p>
-            <p>3. Click <b>Scan Blocks</b> to auto-fill loops.</p>
+            <p>3. Blocks auto-fill if no streets found.</p>
+            <p>4. Save progress to continue later.</p>
         </div>
       </div>
     </div>
