@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.1.0",
   "type": "module",
-  "homepage": "https://johnson1205.github.io/Fog_of_War",
+  "homepage": "https://johnson1205.github.io/TrailBlazer",
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
