@@ -10,6 +10,13 @@ function App() {
   const [statusMessage, setStatusMessage] = useState("Upload a GPX file to start.");
   // Add a version key to force map re-renders because sometimes deep GeoJSON changes aren't detected by key={JSON.stringify}
   const [mapKey, setMapKey] = useState(0);
+  const [isDrawing, setIsDrawing] = useState(false);
+
+  // Callback for DrawControl to update cleared area in real-time
+  const handleDrawUpdate = (newGeometry) => {
+    setClearedArea(newGeometry);
+    setMapKey(prev => prev + 1);
+  };
 
   const handleFileLoaded = async (geoJson, fileType = 'gpx') => {
     setStatusMessage("Processing track geometry...");
@@ -245,7 +252,13 @@ function App() {
 
   return (
     <div className="app-container">
-      <MapComponent clearedArea={clearedArea} center={mapCenter} processKey={mapKey} />
+      <MapComponent 
+        clearedArea={clearedArea} 
+        center={mapCenter} 
+        processKey={mapKey} 
+        isDrawing={isDrawing}
+        onDrawUpdate={handleDrawUpdate}
+      />
       
       <div className="ui-overlay">
         <h1 className="ui-title">TrailBlazer</h1>
@@ -273,15 +286,27 @@ function App() {
           💾 Save Progress
         </button>
         
+        <button 
+            className="ui-btn" 
+            style={{backgroundColor: isDrawing ? '#ef4444' : '#f97316', marginTop: '0.5rem'}}
+            onClick={() => {
+              setIsDrawing(!isDrawing);
+              setStatusMessage(isDrawing ? "Draw mode OFF." : "Draw mode ON. Long-press (0.5s) then drag to draw.");
+            }}
+        >
+          {isDrawing ? '🛑 Stop Drawing' : '✏️ Draw Path'}
+        </button>
+        
         <button className="ui-btn secondary" onClick={handleClear}>
           Reset Map
         </button>
         
         <div style={{marginTop: '1rem', fontSize: '0.75rem', color: '#666'}}>
             <p>1. Upload GPX/XML/GeoJSON track.</p>
-            <p>2. Path is buffered (15m) & cleared.</p>
-            <p>3. Blocks auto-fill if no streets found.</p>
-            <p>4. Save progress to continue later.</p>
+            <p>2. Or click "✏️ Draw Path", long-press + drag.</p>
+            <p>3. Path is buffered (15m) & cleared.</p>
+            <p>4. Blocks auto-fill when you complete a loop.</p>
+            <p>5. Save progress to continue later.</p>
         </div>
       </div>
     </div>

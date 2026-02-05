@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, GeoJSON, useMap, ScaleControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import DrawControl from './DrawControl';
 
 // Fix for Leaflet icons
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -43,7 +44,7 @@ const MapBoundsUpdater = ({ bounds }) => {
   return null;
 };
 
-const MapComponent = ({ clearedArea, center, processKey }) => {
+const MapComponent = ({ clearedArea, center, processKey, isDrawing, onDrawUpdate }) => {
   const defaultCenter = [51.505, -0.09]; // London
   
   // Calculate bounds from GeoJSON if available
@@ -93,6 +94,15 @@ const MapComponent = ({ clearedArea, center, processKey }) => {
             />
         )}
         
+        {/* DrawControl for real-time path drawing */}
+        {isDrawing && (
+          <DrawControl 
+            onDrawUpdate={onDrawUpdate} 
+            clearedArea={clearedArea} 
+            bufferRadius={15}
+          />
+        )}
+        
         {/* Only use one updater if possible to conflict. 
             If bounds exist (file loaded), use bounds. 
             Else use center (initial load or reset). */}
@@ -104,3 +114,4 @@ const MapComponent = ({ clearedArea, center, processKey }) => {
 };
 
 export default MapComponent;
+

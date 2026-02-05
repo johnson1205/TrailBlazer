@@ -50,32 +50,38 @@ export const getArea = (geometry) => {
  * Detects holes, checks for streets via Overpass API (mockable), and fills if empty.
  * @param {Object} geometry - GeoJSON geometry
  * @param {Function} onStatusUpdate - Callback for status messages (msg: string) => void
+ * @param {Object} options - Options object
+ * @param {boolean} options.skipStreetCheck - If true, skip API calls and fill all valid holes immediately
  * @returns {Promise<Object>} - New geometry with filled blocks (Promise!)
  */
-export const fillBlocks = async (geometry, onStatusUpdate = () => {}) => {
+export const fillBlocks = async (geometry, onStatusUpdate = () => {}, options = {}) => {
   if (!geometry) return geometry;
 
-  onStatusUpdate("Analyzing cleared area geometry...");
+  const { skipStreetCheck = false } = options;
+
+  if (!skipStreetCheck) {
+    onStatusUpdate("Analyzing cleared area geometry...");
+  }
 
   // Simplify: Handle Polygon or MultiPolygon
   if (geometry.type === 'Polygon') {
-    return await processPolygon(geometry, onStatusUpdate);
+    return await processPolygon(geometry, onStatusUpdate, skipStreetCheck);
   } else if (geometry.type === 'MultiPolygon') {
     // Process each polygon in the multipolygon
     const newCoords = [];
     let i = 0;
     for (const polyCoords of geometry.coordinates) {
         i++;
-        if (geometry.coordinates.length > 5) onStatusUpdate(`Analyzing polygon part ${i}/${geometry.coordinates.length}...`);
-        newCoords.push(await processPolygonCoordinates(polyCoords, onStatusUpdate));
+        if (!skipStreetCheck && geometry.coordinates.length > 5) onStatusUpdate(`Analyzing polygon part ${i}/${geometry.coordinates.length}...`);
+        newCoords.push(await processPolygonCoordinates(polyCoords, onStatusUpdate, skipStreetCheck));
     }
     return { type: 'MultiPolygon', coordinates: newCoords };
   }
   return geometry;
 };
 
-const processPolygon = async (polygonGeom, onStatusUpdate) => {
-  const newCoords = await processPolygonCoordinates(polygonGeom.coordinates, onStatusUpdate);
+const processPolygon = async (polygonGeom, onStatusUpdate, skipStreetCheck = false) => {
+  const newCoords = await processPolygonCoordinates(polygonGeom.coordinates, onStatusUpdate, skipStreetCheck);
   return { type: 'Polygon', coordinates: newCoords };
 };
 
@@ -92,14 +98,14 @@ const getHoleCacheKey = (holePoly, area) => {
   return `${lat.toFixed(5)}_${lon.toFixed(5)}_${Math.round(area)}`;
 };
 
-const processPolygonCoordinates = async (coords, onStatusUpdate) => {
+const processPolygonCoordinates = async (coords, onStatusUpdate, skipStreetCheck = false) => {
   if (coords.length <= 1) return coords; // No holes to check
 
   const outerRing = coords[0];
   const holes = coords.slice(1);
   const newHoles = [];
   
-  if (holes.length > 0) {
+  if (holes.length > 0 && !skipStreetCheck) {
       onStatusUpdate(`Found ${holes.length} potential blocks (holes). Checking sizes...`);
   }
 
@@ -142,6 +148,12 @@ const processPolygonCoordinates = async (coords, onStatusUpdate) => {
     } else {
       uncachedData.push({ ...data, cacheKey });
     }
+  }
+
+  // If skipStreetCheck is enabled, fill all valid holes immediately without API calls
+  if (skipStreetCheck) {
+    // Fill all valid holes (don't add them back)
+    return [outerRing, ...newHoles];
   }
 
   if (cachedResults.length > 0) {
@@ -210,7 +222,7 @@ const processPolygonCoordinates = async (coords, onStatusUpdate) => {
  * Checks if a given bounding box contains relevant streets.
  * Returns true if streets exist, false if empty (safe to fill).
  */
-const checkIfBlockHasStreets = async (bbox, holePoly) => {
+const checkIfBlockHasStreets = async (bbox, _holePoly) => {
   // bbox is [minLon, minLat, maxLon, maxLat]
   // Overpass expects: (south, west, north, east) -> (minLat, minLon, maxLat, maxLon)
   const [minLon, minLat, maxLon, maxLat] = bbox;

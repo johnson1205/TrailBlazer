@@ -5,13 +5,19 @@ Turn your real-world adventures into an exploration game! Upload your GPS tracks
 🌐 **[Play Now](https://johnson1205.github.io/TrailBlazer/)**
 
 ![TrailBlazer Demo](https://img.shields.io/badge/status-live-brightgreen)
-![Version](https://img.shields.io/badge/version-1.1-blue)
+![Version](https://img.shields.io/badge/version-1.2-blue)
 ![React](https://img.shields.io/badge/React-19.2.0-blue)
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9.4-green)
 
 ## 📋 Version History
 
-### Version 1.1 (Current)
+### Version 1.2 (Current)
+- ✏️ **Manual Path Drawing**: Long-press and drag to draw paths manually on the map
+- 🔄 **Real-time Auto-fill**: Visualize filled blocks instantly while drawing
+- 🛡️ **Smart Verification**: Automatic background check verifies street existence after drawing
+- 👆 **Long-Press Interaction**: Improved touch/mouse interaction to prevent accidental dragging
+
+### Version 1.1
 - 💾 **Save Your Progress**: Export and reload your exploration journey
 - ⚡ **Faster Exploration**: 3x faster area discovery with smart caching
 - 📍 **Waypoint Adventures**: Turn any GPS waypoints into exploration paths
