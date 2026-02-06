@@ -50,10 +50,10 @@ body {
 
 /* UI Drawer (Side Menu) */
 .ui-drawer {
-  position: absolute;
+  position: fixed; /* Fixed to viewport */
   top: 0;
   left: 0;
-  height: 100%;
+  height: 100%; /* Full viewport height */
   width: 320px;
   background: rgba(30, 30, 30, 0.95);
   backdrop-filter: blur(10px);
@@ -93,7 +93,7 @@ body {
 
 /* Menu Toggle Button */
 .menu-toggle {
-  position: absolute;
+  position: fixed; /* Fixed to viewport */
   top: 15px;
   left: 15px;
   z-index: 1500;
@@ -113,25 +113,24 @@ body {
 
 /* GPS FAB (Floating Action Button) */
 .gps-fab {
-  position: absolute;
-  bottom: 30px;
-  right: 30px;
-  /* width: 64px; Remove fixed width */
+  position: fixed; /* Fixed to viewport */
+  bottom: 40px; /* Increased from 30px for safe area */
+  right: 20px; /* Closer to edge on mobile */
   height: 56px;
   padding: 0 20px;
-  border-radius: 28px; /* Pill shape */
-  background: #3b82f6; /* Default Blue */
+  border-radius: 28px;
+  background: #3b82f6;
   color: white;
   border: none;
   font-size: 1rem;
   font-weight: 600;
-  z-index: 1500;
+  z-index: 1500; /* Ensure above map */
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(0,0,0,0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px; /* Space between icon and text */
+  gap: 8px;
   transition: transform 0.2s, background 0.2s, width 0.2s;
 }
 
