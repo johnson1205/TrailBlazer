@@ -85,7 +85,7 @@ const GPSControl = ({ onGPSUpdate, onStatusUpdate = () => {}, clearedArea, buffe
       
       watchIdRef.current = navigator.geolocation.watchPosition(
         (position) => {
-            const { latitude, longitude, accuracy } = position.coords;
+            const { latitude, longitude } = position.coords;
             const newPoint = [latitude, longitude];
             const lastPoint = pathPointsRef.current[pathPointsRef.current.length - 1];
 

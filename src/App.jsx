@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import MapComponent from './components/MapContainer';
 import FileUpload from './components/FileUpload';
-import { bufferPath, mergeAreas, fillBlocks } from './utils/GeometryEngine';
+import { bufferPath, mergeAreas, fillBlocks, getArea } from './utils/GeometryEngine';
 import * as turf from '@turf/turf';
+
+const ACHIEVEMENTS = [
+  { id: 'first_draw', title: 'First Step', icon: '✏️', desc: 'Draw your first path' },
+  { id: 'first_fill', title: 'Block Master', icon: '🟩', desc: 'Successfully fill a block' }
+];
 
 function App() {
   const [clearedArea, setClearedArea] = useState(null);
@@ -14,18 +19,66 @@ function App() {
   const [isGPS, setIsGPS] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(window.innerWidth > 768); // Open by default on desktop
   const [progress, setProgress] = useState(0);
+  
+  // Achievement State
+  const [unlockedAchievements, setUnlockedAchievements] = useState(() => {
+    try {
+      const saved = localStorage.getItem('trailblazer_achievements');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) { return []; }
+  });
+
+  const unlockAchievement = React.useCallback((id) => {
+    setUnlockedAchievements(prev => {
+      if (prev.includes(id)) return prev;
+      const newSet = [...prev, id];
+      localStorage.setItem('trailblazer_achievements', JSON.stringify(newSet));
+      // Optional: Toast notification
+      setStatusMessage(`🏆 Achievement Unlocked: ${ACHIEVEMENTS.find(a => a.id === id)?.title}!`);
+      return newSet;
+    });
+  }, []);
 
   // Callback for status updates from child components
-  const handleStatusUpdate = (msg, percent = 0) => {
+  const handleStatusUpdate = React.useCallback((msg, percent = 0) => {
     setStatusMessage(msg);
     setProgress(percent);
-  };
+    
+    // Check for 'first_fill' achievement
+    // Msg format: "Block analysis complete. Filled: N, Kept: M"
+    if (msg.includes("Filled:")) {
+        const match = msg.match(/Filled:\s*(\d+)/);
+        if (match && parseInt(match[1]) > 0) {
+            unlockAchievement('first_fill');
+        }
+    }
+  }, [unlockAchievement]);
 
   // Callback for DrawControl to update cleared area in real-time
-  const handleDrawUpdate = (newGeometry) => {
+  const handleDrawUpdate = React.useCallback((newGeometry) => {
     setClearedArea(newGeometry);
     setMapKey(prev => prev + 1);
-  };
+    
+    // Check for 'first_draw' achievement
+    if (newGeometry) {
+        unlockAchievement('first_draw');
+    }
+  }, [unlockAchievement]);
+  
+
+
+
+  // Calculate total area
+  const totalArea = React.useMemo(() => {
+    if (!clearedArea) return 0;
+    const a = getArea(clearedArea);
+    console.log("Calculated Area:", a, "sqm");
+    return a;
+  }, [clearedArea]);
+  
+  const formattedArea = totalArea > 1000000 
+    ? `${(totalArea / 1000000).toFixed(2)} km²`
+    : `${Math.round(totalArea).toLocaleString()} m²`;
 
   const handleFileLoaded = async (geoJson, fileType = 'gpx') => {
     setStatusMessage("Processing track geometry...");
@@ -277,6 +330,18 @@ function App() {
            <button className="close-btn" onClick={() => setIsMenuOpen(false)}>✕</button>
         </div>
         
+        <div style={{
+            background: 'rgba(255,255,255,0.05)', 
+            borderRadius: '8px', 
+            padding: '0.75rem', 
+            marginBottom: '1rem', 
+            textAlign: 'center',
+            border: '1px solid rgba(255,255,255,0.1)'
+        }}>
+           <div style={{fontSize: '0.75rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px'}}>Explored Area</div>
+           <div style={{fontSize: '1.5rem', fontWeight: '700', color: '#fff', fontFamily: 'monospace'}}>{formattedArea}</div>
+        </div>
+        
         <p style={{fontSize: '0.8rem', color: '#aaa', marginBottom: '0.5rem'}}>
           {statusMessage}
         </p>
@@ -324,6 +389,40 @@ function App() {
           Reset Map
         </button>
         
+        {/* Achievements Section */}
+        <div style={{marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)'}}>
+            <h3 style={{fontSize: '0.9rem', color: '#fff', margin: '0 0 0.5rem 0'}}>🏆 Achievements</h3>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                {ACHIEVEMENTS.map(ach => {
+                    const isUnlocked = unlockedAchievements.includes(ach.id);
+                    return (
+                        <div key={ach.id} style={{
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '10px', 
+                            padding: '8px', 
+                            background: isUnlocked ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)', 
+                            borderRadius: '8px',
+                            opacity: isUnlocked ? 1 : 0.5,
+                            filter: isUnlocked ? 'none' : 'grayscale(100%)',
+                            transition: 'all 0.3s ease'
+                        }}>
+                            <div style={{fontSize: '1.5rem'}}>{ach.icon}</div>
+                            <div>
+                                <div style={{fontSize: '0.9rem', fontWeight: '600', color: isUnlocked ? '#fff' : '#aaa'}}>
+                                    {ach.title}
+                                </div>
+                                <div style={{fontSize: '0.75rem', color: '#888'}}>
+                                    {ach.desc}
+                                </div>
+                            </div>
+                            {isUnlocked && <div style={{marginLeft: 'auto', color: '#10b981'}}>✓</div>}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+
         <div style={{marginTop: '1rem', fontSize: '0.75rem', color: '#666'}}>
             <p>1. Upload GPX/XML/GeoJSON track.</p>
             <p>2. Or click "✏️ Draw Path", long-press + drag.</p>
