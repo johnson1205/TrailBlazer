@@ -111,14 +111,14 @@ function App() {
         setClearedArea(merged);
         setMapKey(prev => prev + 1);
         
+        if (importedGeometry) unlockAchievement('first_draw');
+        
         setStatusMessage("Progress loaded successfully! Upload more tracks to continue exploring.");
         
         // Auto-trigger block filling
         setTimeout(async () => {
           try {
-            const filled = await fillBlocks(merged, (msg) => {
-              setStatusMessage(msg);
-            });
+            const filled = await fillBlocks(merged, handleStatusUpdate);
             
             const newRef = JSON.parse(JSON.stringify(filled));
             setClearedArea(newRef);
@@ -215,14 +215,14 @@ function App() {
       setClearedArea(merged);
       setMapKey(prev => prev + 1); // Force render
       
+      unlockAchievement('first_draw');
+      
       // AUTO-TRIGGER: Run the City Block Filling logic
       setStatusMessage("Track visible. Checking for closed loops in 1 second...");
       
       setTimeout(async () => {
         try {
-            const filled = await fillBlocks(merged, (msg) => {
-                setStatusMessage(msg); // Real-time progress updates
-            });
+            const filled = await fillBlocks(merged, handleStatusUpdate);
             
             // STEP 2: Show the FILLED track
             const newRef = JSON.parse(JSON.stringify(filled));

@@ -11,13 +11,11 @@ Turn your real-world adventures into an exploration game! Upload your GPS tracks
 
 ## 📋 Version History
 
-### Version 1.4 (Current)
-- 🏆 **Achievement System**: Unlock badges for your exploration milestones (First Path, First Fill).
-- 📐 **Area Calculator**: Real-time display of your total explored area in m² or km².
-- 📊 **Progress Bar**: Visual feedback during block verification.
-- 🎯 **Strict Accuracy**: Optimistic filling disabled. Blocks fill only after verification.
+### Version 1.4.1 (Current)
+- 🏆 **Achievement on Upload**: Uploading tracks now counts towards your achievements.
+- 🐛 **Bug Fixes**: Removed code duplications for smoother stability.
 
-### Version 1.3
+### Version 1.4
 - 📍 **GPS Tracking Integration**: Real-time path drawing using device geolocation
 - 📱 **Mobile Responsive Design**: New Collapsible Menu and FAB GPS button for better phone experience
 - 🛡️ **Session Management**: STRICT verification ensures map accuracy when tracking stops
