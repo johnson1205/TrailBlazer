@@ -34,12 +34,17 @@ const GPSControl = ({ onGPSUpdate, clearedArea, bufferRadius = 15 }) => {
     // Merge with BASE area (snapshot at start)
     const merged = mergeAreas(baseAreaRef.current, buffered);
     
-    // Fill blocks. Default is strict check (skipStreetCheck: false)
-    const fillOptions = { skipStreetCheck: true, ...options };
-    const filled = await fillBlocks(merged, () => {}, fillOptions);
+    let finalGeometry = merged;
+
+    // Only fill blocks if requested (on stop)
+    if (options.shouldFill) {
+        // Fill blocks. Default is strict check (skipStreetCheck: false)
+        const fillOptions = { skipStreetCheck: false, ...options };
+        finalGeometry = await fillBlocks(merged, () => {}, fillOptions);
+    }
     
     // Update parent
-    onGPSUpdate(filled);
+    onGPSUpdate(finalGeometry);
   }, [bufferRadius, onGPSUpdate]);
 
   // Throttled update
@@ -47,7 +52,7 @@ const GPSControl = ({ onGPSUpdate, clearedArea, bufferRadius = 15 }) => {
     const now = Date.now();
     if (now - lastUpdateTimeRef.current >= UPDATE_THROTTLE_MS) {
       lastUpdateTimeRef.current = now;
-      processAndUpdate([...points], { skipStreetCheck: true });
+      processAndUpdate([...points], { shouldFill: false });
     }
   }, [processAndUpdate]);
 
@@ -134,8 +139,9 @@ const GPSControl = ({ onGPSUpdate, clearedArea, bufferRadius = 15 }) => {
         // Final Strict Verification
         if (pathPointsRef.current.length >= 2) {
             // It's safe to call this async, but the component unmounts instantly.
+            // It's safe to call this async, but the component unmounts instantly.
             // The callback might still fire if parent exists.
-            processAndUpdate(pathPointsRef.current, { skipStreetCheck: false });
+            processAndUpdate(pathPointsRef.current, { shouldFill: true, skipStreetCheck: false });
         }
 
         if (polylineLayerRef.current) {

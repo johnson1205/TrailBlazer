@@ -25,6 +25,7 @@ const DrawControl = ({ onDrawUpdate, clearedArea, bufferRadius = 15 }) => {
   const LONG_PRESS_DURATION_MS = 500;
 
   // Sync fill logic - run fill and update parent state
+  // Sync fill logic - run fill and update parent state
   const processAndUpdate = useCallback(async (points, options = {}) => {
     if (points.length < 2) return;
 
@@ -35,26 +36,29 @@ const DrawControl = ({ onDrawUpdate, clearedArea, bufferRadius = 15 }) => {
     // Buffer the path
     const buffered = bufferPath(lineString, bufferRadius);
     
-    // Merge with existing cleared area
-    // CRITICAL: Always merge with the BASE area (snapshot at drag start), not the current prop
-    // This allows us to re-evaluate filling (holes vs solids) without "baking in" the fast-fill results
+    // Merge with BASE area (snapshot at drag start)
     const merged = mergeAreas(baseAreaRef.current, buffered);
     
-    // Fill blocks. Default is strict check (skipStreetCheck: false), but can be overridden.
-    // Allow options to be passed directly.
-    const fillOptions = { skipStreetCheck: true, ...options };
-    const filled = await fillBlocks(merged, () => {}, fillOptions);
+    let finalGeometry = merged;
+
+    // Only fill blocks if requested (on mouseup/stop)
+    if (options.shouldFill) {
+        // Fill blocks. Default is strict check (skipStreetCheck: false), but can be overridden.
+        const fillOptions = { skipStreetCheck: false, ...options };
+        finalGeometry = await fillBlocks(merged, () => {}, fillOptions);
+    }
     
     // Update parent
-    onDrawUpdate(filled);
+    onDrawUpdate(finalGeometry);
   }, [bufferRadius, onDrawUpdate]); // removed clearedArea dependency
 
   // Throttled update during drag - FAST mode
+  // Throttled update during drag - FAST mode (NO FILLING)
   const throttledUpdate = useCallback((points) => {
     const now = Date.now();
     if (now - lastUpdateTimeRef.current >= UPDATE_THROTTLE_MS) {
       lastUpdateTimeRef.current = now;
-      processAndUpdate([...points], { skipStreetCheck: true });
+      processAndUpdate([...points], { shouldFill: false });
     }
   }, [processAndUpdate]);
 
@@ -148,10 +152,10 @@ const DrawControl = ({ onDrawUpdate, clearedArea, bufferRadius = 15 }) => {
       map.doubleClickZoom.enable();
       container.style.cursor = '';
       
-      // Final update with all points - STRICT mode (check streets)
+      // Final update with all points - STRICT mode (check streets) AND FILL
       if (pathPointsRef.current.length >= 2) {
-        // Here we run the strict check to verify if the filled blocks are actually valid
-        await processAndUpdate(pathPointsRef.current, { skipStreetCheck: false });
+        // Run strict check to verify and fill blocks
+        await processAndUpdate(pathPointsRef.current, { shouldFill: true, skipStreetCheck: false });
       }
       
       // Reset visual line and local points
