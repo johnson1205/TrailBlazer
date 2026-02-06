@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, GeoJSON, useMap, ScaleControl } from 'react-le
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import DrawControl from './DrawControl';
+import GPSControl from './GPSControl';
 
 // Fix for Leaflet icons
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -44,7 +45,7 @@ const MapBoundsUpdater = ({ bounds }) => {
   return null;
 };
 
-const MapComponent = ({ clearedArea, center, processKey, isDrawing, onDrawUpdate }) => {
+const MapComponent = ({ clearedArea, center, processKey, isDrawing, isGPS, onDrawUpdate }) => {
   const defaultCenter = [51.505, -0.09]; // London
   
   // Calculate bounds from GeoJSON if available
@@ -95,9 +96,18 @@ const MapComponent = ({ clearedArea, center, processKey, isDrawing, onDrawUpdate
         )}
         
         {/* DrawControl for real-time path drawing */}
-        {isDrawing && (
+        {isDrawing && !isGPS && (
           <DrawControl 
             onDrawUpdate={onDrawUpdate} 
+            clearedArea={clearedArea} 
+            bufferRadius={15}
+          />
+        )}
+
+        {/* GPSControl for real-time location tracking */}
+        {isGPS && !isDrawing && (
+          <GPSControl 
+            onGPSUpdate={onDrawUpdate} 
             clearedArea={clearedArea} 
             bufferRadius={15}
           />

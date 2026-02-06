@@ -11,6 +11,7 @@ function App() {
   // Add a version key to force map re-renders because sometimes deep GeoJSON changes aren't detected by key={JSON.stringify}
   const [mapKey, setMapKey] = useState(0);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [isGPS, setIsGPS] = useState(false);
 
   // Callback for DrawControl to update cleared area in real-time
   const handleDrawUpdate = (newGeometry) => {
@@ -257,6 +258,7 @@ function App() {
         center={mapCenter} 
         processKey={mapKey} 
         isDrawing={isDrawing}
+        isGPS={isGPS}
         onDrawUpdate={handleDrawUpdate}
       />
       
@@ -279,6 +281,18 @@ function App() {
         
         <button 
             className="ui-btn" 
+            style={{backgroundColor: isGPS ? '#ef4444' : '#8b5cf6', marginTop: '0.5rem'}}
+            onClick={() => {
+              if (isDrawing) setIsDrawing(false); 
+              setIsGPS(!isGPS);
+              setStatusMessage(isGPS ? "GPS Tracking OFF." : "GPS Tracking ON. Walk to explore!");
+            }}
+        >
+          {isGPS ? '🛑 Stop GPS' : '📍 Start GPS'}
+        </button>
+
+        <button 
+            className="ui-btn" 
             style={{backgroundColor: '#3b82f6', marginTop: '0.5rem'}}
             onClick={handleExport}
             disabled={!clearedArea}
@@ -290,6 +304,7 @@ function App() {
             className="ui-btn" 
             style={{backgroundColor: isDrawing ? '#ef4444' : '#f97316', marginTop: '0.5rem'}}
             onClick={() => {
+              if (isGPS) setIsGPS(false);
               setIsDrawing(!isDrawing);
               setStatusMessage(isDrawing ? "Draw mode OFF." : "Draw mode ON. Long-press (0.5s) then drag to draw.");
             }}
