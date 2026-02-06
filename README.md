@@ -13,9 +13,9 @@ Turn your real-world adventures into an exploration game! Upload your GPS tracks
 
 ### Version 1.3 (Current)
 - 📍 **GPS Tracking Integration**: Real-time path drawing using device geolocation
-- 📱 **Mobile Exploration**: Walk and explore the real world with live map updates
-- 🔄 **Live Verification**: Auto-fill valid blocks as you physically circle them
+- 📱 **Mobile Responsive Design**: New Collapsible Menu and FAB GPS button for better phone experience
 - 🛡️ **Session Management**: STRICT verification ensures map accuracy when tracking stops
+- 🔄 **Live Verification**: Auto-fill valid blocks as you physically circle them
 
 ### Version 1.2
 - ✏️ **Manual Path Drawing**: Long-press and drag to draw paths manually on the map

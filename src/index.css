@@ -48,25 +48,117 @@ body {
   z-index: 10;
 }
 
-/* Custom UI Overlay */
-.ui-overlay {
+/* UI Drawer (Side Menu) */
+.ui-drawer {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 1000; /* Above map */
-  background: rgba(30, 30, 30, 0.85);
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 320px;
+  background: rgba(30, 30, 30, 0.95);
   backdrop-filter: blur(10px);
-  padding: 1rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  width: 300px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  z-index: 2000;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
-.ui-title {
-  font-size: 1.1rem;
+.ui-drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.close-btn:hover {
+  color: white;
+}
+
+/* Menu Toggle Button */
+.menu-toggle {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  z-index: 1500;
+  background: rgba(30, 30, 30, 0.8);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+/* GPS FAB (Floating Action Button) */
+.gps-fab {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  /* width: 64px; Remove fixed width */
+  height: 56px;
+  padding: 0 20px;
+  border-radius: 28px; /* Pill shape */
+  background: #3b82f6; /* Default Blue */
+  color: white;
+  border: none;
+  font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  z-index: 1500;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Space between icon and text */
+  transition: transform 0.2s, background 0.2s, width 0.2s;
+}
+
+.gps-icon {
+  font-size: 1.5rem;
+}
+
+.gps-fab:active {
+  transform: scale(0.95);
+}
+
+.gps-fab.active {
+  background: #ef4444; /* Red for Stop */
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* Base Styles reused */
+.ui-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
   color: #fff;
 }
 
@@ -74,13 +166,14 @@ body {
   background: #3b82f6;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  padding: 0.75rem 1rem; /* Larger touch target */
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
   transition: background 0.2s;
   width: 100%;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
+  font-size: 1rem;
 }
 
 .ui-btn:hover {
@@ -97,4 +190,26 @@ body {
 
 .file-input-wrapper {
   margin-bottom: 1rem;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .ui-drawer {
+    width: 85%; /* Leave some space on right to tap out? or 100% */
+    max-width: 320px;
+  }
+  
+  .gps-fab {
+    bottom: 20px;
+    right: 20px;
+    height: 48px; /* Slightly smaller on mobile */
+    border-radius: 24px;
+    padding: 0 16px;
+    font-size: 0.9rem;
+    width: auto; /* Ensure it's not square */
+  }
+  
+  .gps-icon {
+    font-size: 1.25rem;
+  }
 }

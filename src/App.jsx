@@ -12,6 +12,7 @@ function App() {
   const [mapKey, setMapKey] = useState(0);
   const [isDrawing, setIsDrawing] = useState(false);
   const [isGPS, setIsGPS] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(window.innerWidth > 768); // Open by default on desktop
 
   // Callback for DrawControl to update cleared area in real-time
   const handleDrawUpdate = (newGeometry) => {
@@ -262,8 +263,12 @@ function App() {
         onDrawUpdate={handleDrawUpdate}
       />
       
-      <div className="ui-overlay">
-        <h1 className="ui-title">TrailBlazer</h1>
+      <div className={`ui-drawer ${isMenuOpen ? 'open' : ''}`}>
+        <div className="drawer-header">
+           <h1 className="ui-title">TrailBlazer</h1>
+           <button className="close-btn" onClick={() => setIsMenuOpen(false)}>✕</button>
+        </div>
+        
         <p style={{fontSize: '0.8rem', color: '#aaa', marginBottom: '1rem'}}>
           {statusMessage}
         </p>
@@ -281,18 +286,6 @@ function App() {
         
         <button 
             className="ui-btn" 
-            style={{backgroundColor: isGPS ? '#ef4444' : '#8b5cf6', marginTop: '0.5rem'}}
-            onClick={() => {
-              if (isDrawing) setIsDrawing(false); 
-              setIsGPS(!isGPS);
-              setStatusMessage(isGPS ? "GPS Tracking OFF." : "GPS Tracking ON. Walk to explore!");
-            }}
-        >
-          {isGPS ? '🛑 Stop GPS' : '📍 Start GPS'}
-        </button>
-
-        <button 
-            className="ui-btn" 
             style={{backgroundColor: '#3b82f6', marginTop: '0.5rem'}}
             onClick={handleExport}
             disabled={!clearedArea}
@@ -307,6 +300,7 @@ function App() {
               if (isGPS) setIsGPS(false);
               setIsDrawing(!isDrawing);
               setStatusMessage(isDrawing ? "Draw mode OFF." : "Draw mode ON. Long-press (0.5s) then drag to draw.");
+              if (window.innerWidth < 768) setIsMenuOpen(false); // Auto-close on mobile
             }}
         >
           {isDrawing ? '🛑 Stop Drawing' : '✏️ Draw Path'}
@@ -324,6 +318,24 @@ function App() {
             <p>5. Save progress to continue later.</p>
         </div>
       </div>
+
+      <button className="menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+        ☰
+      </button>
+
+      <button 
+        className={`gps-fab ${isGPS ? 'active' : ''}`}
+        onClick={() => {
+            if (isDrawing) setIsDrawing(false); 
+            setIsGPS(!isGPS);
+            setStatusMessage(isGPS ? "GPS Tracking OFF." : "GPS Tracking ON. Walk to explore!");
+        }}
+        title="Toggle GPS Tracking"
+      >
+        <span className="gps-icon">{isGPS ? '🛑' : '📍'}</span>
+        <span className="gps-text">{isGPS ? 'Stop GPS' : 'Start GPS'}</span>
+      </button>
+
     </div>
   );
 }
