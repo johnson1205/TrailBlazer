@@ -21,18 +21,13 @@ function App() {
   const [progress, setProgress] = useState(0);
   
   // Achievement State
-  const [unlockedAchievements, setUnlockedAchievements] = useState(() => {
-    try {
-      const saved = localStorage.getItem('trailblazer_achievements');
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) { return []; }
-  });
+  const [unlockedAchievements, setUnlockedAchievements] = useState([]);
 
   const unlockAchievement = React.useCallback((id) => {
     setUnlockedAchievements(prev => {
       if (prev.includes(id)) return prev;
       const newSet = [...prev, id];
-      localStorage.setItem('trailblazer_achievements', JSON.stringify(newSet));
+      
       // Optional: Toast notification
       setStatusMessage(`🏆 Achievement Unlocked: ${ACHIEVEMENTS.find(a => a.id === id)?.title}!`);
       return newSet;
