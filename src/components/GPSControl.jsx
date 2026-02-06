@@ -8,7 +8,7 @@ import { bufferPath, mergeAreas, fillBlocks } from '../utils/GeometryEngine';
  * GPSControl - Enables real-time path drawing via GPS geolocation.
  * Mimics behavior of DrawControl but driven by watchPosition.
  */
-const GPSControl = ({ onGPSUpdate, clearedArea, bufferRadius = 15 }) => {
+const GPSControl = ({ onGPSUpdate, onStatusUpdate = () => {}, clearedArea, bufferRadius = 15 }) => {
   const map = useMap();
   const pathPointsRef = useRef([]);
   const polylineLayerRef = useRef(null);
@@ -40,12 +40,12 @@ const GPSControl = ({ onGPSUpdate, clearedArea, bufferRadius = 15 }) => {
     if (options.shouldFill) {
         // Fill blocks. Default is strict check (skipStreetCheck: false)
         const fillOptions = { skipStreetCheck: false, ...options };
-        finalGeometry = await fillBlocks(merged, () => {}, fillOptions);
+        finalGeometry = await fillBlocks(merged, onStatusUpdate, fillOptions);
     }
     
     // Update parent
     onGPSUpdate(finalGeometry);
-  }, [bufferRadius, onGPSUpdate]);
+  }, [bufferRadius, onGPSUpdate, onStatusUpdate]);
 
   // Throttled update
   const throttledUpdate = useCallback((points) => {

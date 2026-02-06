@@ -13,6 +13,13 @@ function App() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [isGPS, setIsGPS] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(window.innerWidth > 768); // Open by default on desktop
+  const [progress, setProgress] = useState(0);
+
+  // Callback for status updates from child components
+  const handleStatusUpdate = (msg, percent = 0) => {
+    setStatusMessage(msg);
+    setProgress(percent);
+  };
 
   // Callback for DrawControl to update cleared area in real-time
   const handleDrawUpdate = (newGeometry) => {
@@ -261,6 +268,7 @@ function App() {
         isDrawing={isDrawing}
         isGPS={isGPS}
         onDrawUpdate={handleDrawUpdate}
+        onStatusUpdate={handleStatusUpdate}
       />
       
       <div className={`ui-drawer ${isMenuOpen ? 'open' : ''}`}>
@@ -269,9 +277,15 @@ function App() {
            <button className="close-btn" onClick={() => setIsMenuOpen(false)}>✕</button>
         </div>
         
-        <p style={{fontSize: '0.8rem', color: '#aaa', marginBottom: '1rem'}}>
+        <p style={{fontSize: '0.8rem', color: '#aaa', marginBottom: '0.5rem'}}>
           {statusMessage}
         </p>
+
+        {progress > 0 && progress < 100 && (
+            <div style={{width: '100%', background: 'rgba(255,255,255,0.1)', height: '6px', borderRadius: '3px', overflow: 'hidden', marginBottom: '1rem'}}>
+               <div style={{width: `${progress}%`, background: '#10b981', height: '100%', transition: 'width 0.3s ease'}}></div>
+            </div>
+        )}
         
         <FileUpload onFileLoaded={handleFileLoaded} />
         

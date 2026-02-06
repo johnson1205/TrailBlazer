@@ -11,7 +11,8 @@ Turn your real-world adventures into an exploration game! Upload your GPS tracks
 
 ## 📋 Version History
 
-### Version 1.3.1 (Current)
+### Version 1.3.2 (Current)
+- 📊 **Progress Indicator**: Added a visual progress bar during the block verification process.
 - 🎯 **Strict Mode Enabled**: Disabled optimistic filling. Blocks are now only filled AFTER you complete the loop and verification is successful.
 - 📱 **Mobile UI Fixes**: Improved visibility of controls on mobile devices.
 

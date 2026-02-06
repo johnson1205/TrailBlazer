@@ -9,7 +9,7 @@ import { bufferPath, mergeAreas, fillBlocks } from '../utils/GeometryEngine';
  * Long-press (500ms) activates drawing mode, then drag to draw.
  * As the user draws, closed loops are auto-filled in real-time.
  */
-const DrawControl = ({ onDrawUpdate, clearedArea, bufferRadius = 15 }) => {
+const DrawControl = ({ onDrawUpdate, onStatusUpdate = () => {}, clearedArea, bufferRadius = 15 }) => {
   const map = useMap();
   const isDrawingRef = useRef(false);
   const isLongPressRef = useRef(false);
@@ -45,12 +45,12 @@ const DrawControl = ({ onDrawUpdate, clearedArea, bufferRadius = 15 }) => {
     if (options.shouldFill) {
         // Fill blocks. Default is strict check (skipStreetCheck: false), but can be overridden.
         const fillOptions = { skipStreetCheck: false, ...options };
-        finalGeometry = await fillBlocks(merged, () => {}, fillOptions);
+        finalGeometry = await fillBlocks(merged, onStatusUpdate, fillOptions);
     }
     
     // Update parent
     onDrawUpdate(finalGeometry);
-  }, [bufferRadius, onDrawUpdate]); // removed clearedArea dependency
+  }, [bufferRadius, onDrawUpdate, onStatusUpdate]); // removed clearedArea dependency
 
   // Throttled update during drag - FAST mode
   // Throttled update during drag - FAST mode (NO FILLING)

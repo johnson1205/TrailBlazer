@@ -45,7 +45,7 @@ const MapBoundsUpdater = ({ bounds }) => {
   return null;
 };
 
-const MapComponent = ({ clearedArea, center, processKey, isDrawing, isGPS, onDrawUpdate }) => {
+const MapComponent = ({ clearedArea, center, processKey, isDrawing, isGPS, onDrawUpdate, onStatusUpdate }) => {
   const defaultCenter = [51.505, -0.09]; // London
   
   // Calculate bounds from GeoJSON if available
@@ -99,6 +99,7 @@ const MapComponent = ({ clearedArea, center, processKey, isDrawing, isGPS, onDra
         {isDrawing && !isGPS && (
           <DrawControl 
             onDrawUpdate={onDrawUpdate} 
+            onStatusUpdate={onStatusUpdate}
             clearedArea={clearedArea} 
             bufferRadius={15}
           />
@@ -108,6 +109,7 @@ const MapComponent = ({ clearedArea, center, processKey, isDrawing, isGPS, onDra
         {isGPS && !isDrawing && (
           <GPSControl 
             onGPSUpdate={onDrawUpdate} 
+            onStatusUpdate={onStatusUpdate}
             clearedArea={clearedArea} 
             bufferRadius={15}
           />

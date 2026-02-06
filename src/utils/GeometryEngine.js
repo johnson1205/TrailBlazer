@@ -172,7 +172,11 @@ const processPolygonCoordinates = async (coords, onStatusUpdate, skipStreetCheck
       const batchNum = Math.floor(i / BATCH_SIZE) + 1;
       const totalBatches = Math.ceil(uncachedData.length / BATCH_SIZE);
       
-      onStatusUpdate(`Processing batch ${batchNum}/${totalBatches} (${batch.length} blocks)...`);
+      // Calculate Progress
+      const processedCount = i;
+      const progressPercent = Math.round((processedCount / uncachedData.length) * 100);
+      
+      onStatusUpdate(`Processing batch ${batchNum}/${totalBatches} (${batch.length} blocks)...`, progressPercent);
       
       // Process batch in parallel
       const results = await Promise.all(
